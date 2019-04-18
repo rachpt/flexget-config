@@ -1,0 +1,216 @@
+variables: variables.yml
+web_server: 
+  port: '{? web_port ?}'
+  base_url: /
+  web_ui: yes
+  #run_v2: true
+
+schedules:
+  - tasks: ['hdchina', 'wiki', 'hdsky', 'byr_an', 'ipt_movies']
+    interval:
+      minutes: 3
+  - tasks: 'ipt_tvs'
+    schedule:
+      day_of_week: mon
+      hour: 8-10
+      minute: "*/1"
+
+templates:
+  use_trs:
+    transmission:
+      host: '{? trs.host ?}'
+      port: '{? trs.port ?}'
+      username: '{? trs.usr ?}'
+      password: '{? trs.pwd ?}'
+
+    free_space:
+      path: '{? movies_path ?}'
+      space: 10240
+    download: '{? torrent_path ?}'
+
+  use_qbt:
+    qbittorrent:
+      label: auto
+      host: '{? qbt.host ?}'
+      port: '{? qbt.port ?}'
+      username: '{? qbt.usr ?}'
+      password: '{? qbt.pwd ?}'
+
+    free_space:
+      path: '{? movies_path ?}'
+      space: 10240
+    download: '{? torrent_path ?}'
+
+  ##----------------##
+  size_movie:
+    content_size:
+      min: 512
+      max: 22480
+      strict: no
+
+  ##----------------##
+  size_tv:
+    content_size:
+      min: 500
+      max: 11264
+      strict: no
+  
+  ##----------------##
+  test_T:
+    download: '{? torrent_test_path ?}'
+
+tasks:
+  hdchina:
+    rss: '{? rss.hdchina ?}'
+    accept_all: yes
+    exists_movie:
+      path: /mnt/data/movies
+      allow_different_qualities: better
+
+    template:
+      - size_movie
+      - use_qbt
+
+    qbittorrent:
+      #ratio: 4
+      path: '{? movies_path ?}'
+
+  ##----------------##
+  wiki:
+    rss: '{? rss.wiki ?}'
+    template:
+      - size_movie
+      - use_qbt
+    if:
+      - "'1080p' in title": reject
+      - "'WiKi' in title": accept
+    exists_movie:
+      path: '{? movies_path ?}'
+      allow_different_qualities: better
+
+    qbittorrent:
+      #ratio: 2
+      path: '{? movies_path ?}'
+
+  ##----------------##
+  hdsky:
+    rss: '{? rss.hdsky ?}'
+    template:
+      - size_movie
+      - use_qbt
+    if:
+      - "'Complete' in title": reject
+      - "'x264' in title": reject
+      - "'iPad' in title": accept
+    content_size:
+      min: 400
+      max: 10240
+      strict: no
+    qbittorrent:
+      #ratio: 2
+      path: '{? mp4_path ?}'
+      
+  ##----------------##
+  #tjupt:
+    #rss: '{? rss.hdsky ?}'
+    #template:
+      #- default
+    #if:
+      ##- "'Complete' in title": reject
+      #- "'NYHD' in title": reject
+      #- "'-RS' in title": reject
+      #- "'The.Wrath.Of.Time.2019' in title": accept
+    #content_size:
+      #min: 100
+      #max: 10240
+      #strict: no
+    #qbittorrent:
+      ##ratio: 4
+      #path: '{? series_path ?}'
+
+  ##----------------##
+  byr_an:
+    rss: '{? rss.byr_an ?}'
+    template:
+      - size_movie
+      - use_qbt
+    if:
+      - "'Complete' in title": reject
+      - "'NYHD' in title": reject
+      - "'-RS' in title": reject
+      - "'Cinderella.Chef' in title": accept
+      - "'Douro.Mainland' in title": accept
+      - "'Great.Journey.Of.Teenagers' in title": accept
+      - "'M.JOYBO.Words.From.My.Heart' in title": accept
+      - "'Relying.on.Heaven.to.Slaughter.Dragons' in title": accept
+
+    qbittorrent:
+      #ratio: 2
+      path: '{? series_path ?}'
+
+  ##----------------##
+  ipt_movies:
+    rss: '{? rss.ipt_mvs ?}'
+    template:
+      - size_movie
+      - use_qbt
+    quality:
+      - 720p bluray
+      - 1080p webdl
+    regexp:
+      accept_excluding:
+        - .*-WiKi$
+        - .*-HDC$
+        - .*remux.*
+        - .*-HDS$
+        - .*-HDH$
+        - .*-CHD$
+        - .*-Geek$
+        - .*-MT$
+        - .*COMPLETE.*
+    exists_movie:
+      path: '{? movies_path ?}'
+      allow_different_qualities: better
+    content_size:
+      min: 100
+      max: 12240
+      strict: no
+    qbittorrent:
+      path: '{? movies_path ?}'
+  ##----------------##
+  ipt_tvs:
+    rss: '{? rss.ipt_tvs ?}'
+    template:
+      - size_tv
+      - use_qbt
+    quality:
+      - 720p
+      - 1080p
+    regexp:
+      accept:
+        - game.*of.*Thrones.*s08e.*-GoT
+        - game.*of.*Thrones.*s08e.*720p.*
+      reject:
+        - .*-MT$
+        - .*-HDC$
+        - .*hevc.*
+        - .*x265.*
+        - .*-Mobile$
+
+    qbittorrent:
+      path: '{? series_path ?}'
+
+  #----------------##
+  # for test 
+  ttt:
+    rss: '{? rss.test_rss ?}'
+    template:
+      - test_T
+    regexp:
+      accept:
+        - .*Game.of.Thrones.S08E01.Kings.Landing.720p.AMZN.WEB-DL.DDP5.1.H.264-GoT[^a-z0-9].*
+    if:
+      - "'Distinction' in title": accept
+    #quality:
+      #- 1080p bluray
+      #- 720p webdl

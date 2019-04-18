@@ -1,0 +1,30 @@
+web_port: 9999
+trs:
+  host: localhost
+  port: 9091
+  usr: trs-user
+  pwd: 'trs-passwd'
+qbt:
+  host: localhost
+  port: 8081
+  usr: qbt-user
+  pwd: 'qbt-passwd'
+
+movies_path: /path/to/save/movies
+series_path: /path/to/save/series
+mp4_path: /path/to/save/mp4
+
+torrent_path: /path/to/save/torrent_file
+
+rss:
+  hdchina: "https://hdchina.org/torrentrss.php?xxx"
+  wiki: "https://totheglory.im/putrss.php?xxx"
+  hdsky: "https://hdsky.me/torrentrss.php?xxx"
+  byr_an: "https://bt.byr.cn/torrentrss.php?xxx"
+  ipt_mvs: "https://iptorrents.com/t.rss?xxx"
+  ipt_tvs: "https://iptorrents.com/t.rss?xxx"
+  tjupt: "https://www.tjupt.org/torrentrss.php?xxx"
+
+  test_rss: 'balabala'
+
+torrent_test_path: /path/to/test
