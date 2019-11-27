@@ -6,14 +6,14 @@ web_server:
   #run_v2: true
 
 schedules:
-  - tasks: ['hdchina', 'wiki', 'hdsky', 'byr_an', 'ipt_movies']
+  - tasks: ['hdchina', 'wiki','byr_an', 'tjupt', 'hdsky']
     interval:
-      minutes: 3
-  - tasks: 'ipt_tvs'
-    schedule:
-      day_of_week: mon
-      hour: 8-10
-      minute: "*/1"
+      minutes: 2
+#   - tasks: 'ipt_tvs'
+#     schedule:
+#       day_of_week: mon
+#       hour: 8-10
+#       minute: "*/1"
 
 templates:
   use_trs:
@@ -44,7 +44,7 @@ templates:
   ##----------------##
   size_movie:
     content_size:
-      min: 512
+      min: 100
       max: 22480
       strict: no
 
@@ -111,22 +111,29 @@ tasks:
       path: '{? mp4_path ?}'
       
   ##----------------##
-  #tjupt:
-    #rss: '{? rss.hdsky ?}'
-    #template:
-      #- default
-    #if:
-      ##- "'Complete' in title": reject
-      #- "'NYHD' in title": reject
-      #- "'-RS' in title": reject
-      #- "'The.Wrath.Of.Time.2019' in title": accept
-    #content_size:
-      #min: 100
-      #max: 10240
-      #strict: no
-    #qbittorrent:
-      ##ratio: 4
-      #path: '{? series_path ?}'
+  tjupt:
+    rss: '{? rss.tjupt ?}'
+    template:
+      - size_movie
+      - use_qbt
+    if:
+      #- "'Complete' in title": reject
+      - "'NYHD' in title": reject
+      - "'-RS' in title": reject
+    regexp:
+      accept:
+        - .*The.Longest.Day.In.Chang'an.*-TJUPT.*
+        - .*The.King's.Avatar.2019.*-TJUPT.*
+        - .*Grandmaster.of.Demonic.Cultivation.2019.*
+        - .*Fights.Break.Sphere.2019.S03.*
+      reject:
+        - .*-MT.*
+        - .*-OurTV.*
+        - .*-TPL.*
+        - .*4K H265 AAC-MoeCat.*
+    qbittorrent:
+      #ratio: 2
+      path: '{? series_path ?}'
 
   ##----------------##
   byr_an:
@@ -138,12 +145,18 @@ tasks:
       - "'Complete' in title": reject
       - "'NYHD' in title": reject
       - "'-RS' in title": reject
-      - "'Cinderella.Chef' in title": accept
-      - "'Douro.Mainland' in title": accept
+      - "'HDCTV' in title": reject
+      - "'TJUPT' in title": reject
       - "'Great.Journey.Of.Teenagers' in title": accept
-      - "'M.JOYBO.Words.From.My.Heart' in title": accept
-      - "'Relying.on.Heaven.to.Slaughter.Dragons' in title": accept
+      - "'Deadly.Response' in title": accept
+    regexp:
+      accept:
+        - .*INCARNATION.*
+        - .*Douro.Mainland.*
+        - .*Scissor.Seven*
+        - .*Qing.Yu.Nian.2019.*-NM.*
 
+    #exists: '{? series_path ?}'
     qbittorrent:
       #ratio: 2
       path: '{? series_path ?}'
@@ -185,18 +198,37 @@ tasks:
       - use_qbt
     quality:
       - 720p
-      - 1080p
     regexp:
       accept:
-        - game.*of.*Thrones.*s08e.*-GoT
-        - game.*of.*Thrones.*s08e.*720p.*
+        - game.*of.*Thrones.*s08e06.*720p.*
       reject:
         - .*-MT$
         - .*-HDC$
         - .*hevc.*
         - .*x265.*
         - .*-Mobile$
+        - .*HDTV.*
+        - .*720p.*-GoT.*
 
+    exists: '{? series_path ?}'
+    qbittorrent:
+      path: '{? series_path ?}'
+
+  ##----------------##
+  got:
+    rss: '{? rss.got ?}'
+    template:
+      - size_tv
+      - use_qbt
+    quality:
+      - 1080p
+    regexp:
+      accept:
+        - .*game.*of.*Thrones.*s08e06.*-GoT.*
+    exists: '{? series_path ?}'
+    exists_series:
+      path: '{? series_path ?}'
+      allow_different_qualities: yes
     qbittorrent:
       path: '{? series_path ?}'
 
@@ -204,13 +236,16 @@ tasks:
   # for test 
   ttt:
     rss: '{? rss.test_rss ?}'
+    #html: '{? rss.test_html ?}'
     template:
-      - test_T
+      - use_qbt
     regexp:
       accept:
-        - .*Game.of.Thrones.S08E01.Kings.Landing.720p.AMZN.WEB-DL.DDP5.1.H.264-GoT[^a-z0-9].*
-    if:
-      - "'Distinction' in title": accept
+        - .*Chernobyl.S01E03.iNTERNAL.1080p.WEB.H264-MEMENTO.*
+        - .*Killing.Eve.*
+
+    #exists: '{? series_path ?}'
+    #exists_series: '{? series_path ?}'
     #quality:
       #- 1080p bluray
       #- 720p webdl
